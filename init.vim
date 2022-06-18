@@ -102,10 +102,10 @@ Plug 'junegunn/fzf.vim'
 
 " color schemas
 Plug 'morhetz/gruvbox'  " colorscheme gruvbox
-Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
-Plug 'kaicataldo/material.vim', { 'branch': 'main' }
-Plug 'ayu-theme/ayu-vim'
-Plug 'schickling/vim-bufonly'
+"Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
+"Plug 'kaicataldo/material.vim', { 'branch': 'main' }
+"Plug 'ayu-theme/ayu-vim'
+
 
 " For JS/JSX
 " Plug 'yuezk/vim-js'
@@ -115,6 +115,8 @@ Plug 'schickling/vim-bufonly'
 Plug 'easymotion/vim-easymotion'
 
 Plug 'airblade/vim-gitgutter'
+
+Plug 'schickling/vim-bufonly'
 
 call plug#end()
 
