@@ -120,7 +120,7 @@ Plug 'schickling/vim-bufonly'
 
 call plug#end()
 
-
+let g:gitgutter_enabled = 0
 
 colorscheme gruvbox
 "colorscheme OceanicNext
