@@ -120,6 +120,7 @@ Plug 'airblade/vim-gitgutter'
 
 Plug 'schickling/vim-bufonly'
 
+Plug 'ntpeters/vim-better-whitespace'
 call plug#end()
 
 let g:gitgutter_enabled = 0
@@ -230,6 +231,15 @@ nvim_lsp.intelephense.setup {
   }
 };
 
+nvim_lsp.pyright.setup {
+  on_attach = on_attach,
+  flags = {
+    debounce_text_changes = 150,
+  },
+  capabilities = capabilities,
+  settings = {
+  }
+}
 
 -- luasnip setup
 local luasnip = require 'luasnip'
