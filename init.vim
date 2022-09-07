@@ -100,6 +100,8 @@ call plug#begin('~/.vim/plugged')
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
+Plug 'preservim/nerdtree'
+
 " color schemas
 Plug 'morhetz/gruvbox'  " colorscheme gruvbox
 "Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
@@ -403,6 +405,9 @@ omap / <Plug>(easymotion-tn)
 " different highlight method and have some other features )
 map  n <Plug>(easymotion-next)
 map  N <Plug>(easymotion-prev)
+
+" nnoremap <C-t> :NERDTreeFocus<CR>
+nnoremap <C-t> :NERDTreeToggle<CR>
 
 " GALAGYLINE SECTION
 lua << EOF
