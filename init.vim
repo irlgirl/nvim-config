@@ -83,7 +83,7 @@ set autoindent
 set fileformat=unix
 filetype indent on      " load filetype-specific indent files
 
-set switchbuf=usetab
+"set switchbuf=usetab
 
 "inoremap jk <esc>
 
@@ -96,6 +96,8 @@ call plug#begin('~/.vim/plugged')
 " Plug 'saadparwaiz1/cmp_luasnip'
 " Plug 'L3MON4D3/LuaSnip'
 "Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+Plug 'tklepzig/vim-buffer-navigator'
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -209,7 +211,7 @@ nvim_lsp.clangd.setup {
   flags = {
     debounce_text_changes = 150,
   },
-  capabilities = capabilities 
+  capabilities = capabilities
 }
 
 
@@ -270,6 +272,7 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
+    --[[
     ['<Tab>'] = function(fallback)
       if vim.fn.pumvisible() == 1 then
         vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
@@ -288,6 +291,7 @@ cmp.setup {
         fallback()
       end
     end,
+    --]]
   }),
   sources = {
     { name = 'nvim_lsp' },
@@ -403,6 +407,16 @@ set colorcolumn=119
 
 " easymotion
 let g:EasyMotion_smartcase = 1
+
+" disable default buffer navigator
+let g:BufferNavigatorMapKeys = 0
+map ga :BufferNavigatorToggle<cr>
+let g:BufferNavigatorHighlightRules = [
+    \["CppFile", "file", ".*\\.cpp", "NONE", "red", "NONE", "red"],
+    \["CppHeader", "file", ".*\\.h", "NONE", "green", "NONE", "green"],
+    \["TLFile", "file", ".*\\.tl", "NONE", "cyan", "NONE", "cyan"],
+    \["CommonDirectory", "dir", "common", "NONE", "yellow", "NONE", "yellow"],
+    \]
 
 map <Leader> <Plug>(easymotion-prefix)
 nmap s <Plug>(easymotion-overwin-f2)
