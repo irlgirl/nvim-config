@@ -106,6 +106,7 @@ Plug 'preservim/nerdtree'
 
 " color schemas
 Plug 'morhetz/gruvbox'  " colorscheme gruvbox
+Plug 'octol/vim-cpp-enhanced-highlight'
 "Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
 "Plug 'kaicataldo/material.vim', { 'branch': 'main' }
 "Plug 'ayu-theme/ayu-vim'
@@ -135,20 +136,28 @@ set background=dark
 
 colorscheme gruvbox
 "colorscheme OceanicNext
-"let g:material_terminal_italics = 1
+let g:material_terminal_italics = 1
 " variants: default, palenight, ocean, lighter, darker, default-community,
 "           palenight-community, ocean-community, lighter-community,
 "           darker-community
 " let g:material_theme_style = 'darker'
 " colorscheme material
-" if (has('termguicolors'))
-"  set termguicolors
-" endif
+if (has('termguicolors'))
+  set termguicolors
+endif
 
 " variants: mirage, dark, dark
 "let ayucolor="mirage"
 "colorscheme ayu
 
+" C++ highlighting
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+let g:cpp_posix_standard = 1
+let g:cpp_experimental_template_highlight = 1
+let g:cpp_concepts_highlight = 1
+let g:cpp_no_function_highlight = 1
 
 
 " turn off search highlight
@@ -203,7 +212,7 @@ end
 
 -- nvim-cmp supports additional completion capabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 local servers = { 'clangd', '' }
 nvim_lsp.clangd.setup {
@@ -211,7 +220,15 @@ nvim_lsp.clangd.setup {
   flags = {
     debounce_text_changes = 150,
   },
-  capabilities = capabilities
+  capabilities = capabilities,
+  cmd = {
+    "clangd",
+    "--background-index",
+    "--clang-tidy",
+    "--suggest-missing-includes",
+    "-j=12",
+    "--pch-storage=memory",
+  }
 }
 
 
@@ -403,7 +420,7 @@ map gp :bp<cr>
 map gw :Bclose<cr>
 map gon :BOnly<cr>
 
-set colorcolumn=119
+"set colorcolumn=119
 
 " easymotion
 let g:EasyMotion_smartcase = 1
