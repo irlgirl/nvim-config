@@ -30,17 +30,16 @@ require('packer').startup(function(use)
  -- use 'nvim-treesitter/nvim-treesitter-textobjects'
   use "williamboman/nvim-lsp-installer"
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
-  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin,
-  use "onsails/lspkind-nvim"
+
   use "hrsh7th/cmp-buffer"
   use "hrsh7th/cmp-path"
+  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin,
   use "hrsh7th/cmp-nvim-lsp"
   use "hrsh7th/cmp-nvim-lua"
 
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
-  require "cmp_nvim_lsp"
   require "cmp_nvim_lsp"
   require "cmp_nvim_lua"
   require 'lspconfig'
@@ -57,12 +56,13 @@ require('packer').startup(function(use)
   }
 
   -- statusline
+  use 'kyazdani42/nvim-web-devicons'
   use {
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
 
-
+  use 'stevearc/profile.nvim'
 end)
 
 
@@ -83,19 +83,7 @@ set autoindent
 set fileformat=unix
 filetype indent on      " load filetype-specific indent files
 
-"set switchbuf=usetab
-
-"inoremap jk <esc>
-
 call plug#begin('~/.vim/plugged')
-
-" Plug 'neovim/nvim-lspconfig'
-" Plug 'hrsh7th/nvim-cmp'
-" Plug 'hrsh7th/cmp-path'
-" Plug 'hrsh7th/cmp-nvim-lsp'
-" Plug 'saadparwaiz1/cmp_luasnip'
-" Plug 'L3MON4D3/LuaSnip'
-"Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 Plug 'tklepzig/vim-buffer-navigator'
 
@@ -111,7 +99,6 @@ Plug 'octol/vim-cpp-enhanced-highlight'
 "Plug 'kaicataldo/material.vim', { 'branch': 'main' }
 "Plug 'ayu-theme/ayu-vim'
 
-
 " For JS/JSX
 " Plug 'yuezk/vim-js'
 " Plug 'maxmellon/vim-jsx-pretty'
@@ -124,13 +111,16 @@ Plug 'airblade/vim-gitgutter'
 Plug 'schickling/vim-bufonly'
 
 Plug 'ntpeters/vim-better-whitespace'
+Plug 'thaerkh/vim-workspace'
+
+"Plug 'rmagatti/goto-preview'
 call plug#end()
 
 let g:gitgutter_enabled = 0
 
-set termguicolors
-let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+"set termguicolors
+"let &t_8f = \"\<Esc>[38;2;%lu;%lu;%lum"
+"let &t_8b = \"\<Esc>[48;2;%lu;%lu;%lum"
 
 set background=dark
 
@@ -142,204 +132,10 @@ let g:material_terminal_italics = 1
 "           darker-community
 " let g:material_theme_style = 'darker'
 " colorscheme material
-if (has('termguicolors'))
-  set termguicolors
-endif
 
 " variants: mirage, dark, dark
 "let ayucolor="mirage"
 "colorscheme ayu
-
-" C++ highlighting
-let g:cpp_class_scope_highlight = 1
-let g:cpp_member_variable_highlight = 1
-let g:cpp_class_decl_highlight = 1
-let g:cpp_posix_standard = 1
-let g:cpp_experimental_template_highlight = 1
-let g:cpp_concepts_highlight = 1
-let g:cpp_no_function_highlight = 1
-
-
-" turn off search highlight
-nnoremap ,<space> :nohlsearch<CR>
-
-
-
-lua << EOF
-require "cmp_nvim_lsp"
-require "cmp_nvim_lsp"
-require "cmp_nvim_lua"
-
-
--- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
-
-local nvim_lsp = require('lspconfig')
-
--- Use an on_attach function to only map the following keys
--- after the language server attaches to the current buffer
-local on_attach = function(client, bufnr)
-
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
-  -- Enable completion triggered by <c-x><c-o>
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-  -- Mappings.
-  local opts = { noremap=true, silent=true }
-
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-  buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-  buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap('v', 'ff', '<ESC><cmd>lua vim.lsp.buf.range_formatting()<CR>', opts)
-
-end
-
--- nvim-cmp supports additional completion capabilities
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-
-local servers = { 'clangd', '' }
-nvim_lsp.clangd.setup {
-  on_attach = on_attach,
-  flags = {
-    debounce_text_changes = 150,
-  },
-  capabilities = capabilities,
-  cmd = {
-    "clangd",
-    "--background-index",
-    "--clang-tidy",
-    "--suggest-missing-includes",
-    "-j=12",
-    "--pch-storage=memory",
-  }
-}
-
-
-nvim_lsp.intelephense.setup {
-  on_attach = on_attach,
-  flags = {
-    debounce_text_changes = 150,
-  },
-  capabilities = capabilities,
-  settings = {
-    intelephense = {
-      environment = {
-        includePaths = { '/home/andi/engine/tornado/src', }
-      },
-      files = {
-        maxSize = 5000000;
-      },
-    }
-  }
-};
-
-nvim_lsp.pyright.setup {
-  on_attach = on_attach,
-  flags = {
-    debounce_text_changes = 150,
-  },
-  capabilities = capabilities,
-  settings = {
-  }
-}
-
--- luasnip setup
-local luasnip = require 'luasnip'
-
-
--- nvim-cmp setup
-local cmp = require 'cmp'
-
-local select_opts = {behavior = cmp.SelectBehavior.Select}
-
-cmp.setup {
-  completion = {
-    autocomplete = false
-  },
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-p>'] = cmp.mapping.select_prev_item(select_opts),
-    ['<C-n>'] = cmp.mapping.select_next_item(select_opts),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-b>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
-    --[[
-    ['<Tab>'] = function(fallback)
-      if vim.fn.pumvisible() == 1 then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
-      elseif luasnip.expand_or_jumpable() then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
-      else
-        fallback()
-      end
-    end,
-    ['<S-Tab>'] = function(fallback)
-      if vim.fn.pumvisible() == 1 then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
-      elseif luasnip.jumpable(-1) then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
-      else
-        fallback()
-      end
-    end,
-    --]]
-  }),
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'path', keyword_length },
---    { name = 'buffer', keyword_length = 3 },
-    { name = 'luasnip', keyword_length = 3 },
-  },
-  window = {
-    documentation = cmp.config.window.bordered()
-  },
-  formatting = {
-    fields = {'menu', 'abbr', 'kind'},
-    format = function(entry, item)
-      local menu_icon = {
-        nvim_lsp = 'λ',
-        buffer = 'Ω',
-        path = '∫',
-        luasnip = '†',
-      }
-
-      item.menu = menu_icon[entry.source.name]
-      return item
-    end,
-  },
-}
-
-
-
-EOF
-
-
 
 " Delete buffer while keeping window layout (don't close buffer's windows).
 " Version 2008-11-18 from http://vim.wikia.com/wiki/VimTip165
@@ -415,8 +211,8 @@ command! -bang -complete=buffer -nargs=? Bclose call <SID>Bclose(<q-bang>, <q-ar
 nnoremap <silent> <Leader>bd :Bclose<CR>
 
 
-map gn :bn<cr>
-map gp :bp<cr>
+map <C-k> :bn<cr>
+map <C-j> :bp<cr>
 map gw :Bclose<cr>
 map gon :BOnly<cr>
 
@@ -432,11 +228,13 @@ let g:BufferNavigatorHighlightRules = [
     \["CppFile", "file", ".*\\.cpp", "NONE", "red", "NONE", "red"],
     \["CppHeader", "file", ".*\\.h", "NONE", "green", "NONE", "green"],
     \["TLFile", "file", ".*\\.tl", "NONE", "cyan", "NONE", "cyan"],
+    \["Txt", "file", ".*\\.txt", "NONE", "white", "NONE", "white"],
+    \["LogTxt", "file", ".*\\.log", "NONE", "white", "NONE", "white"],
     \["CommonDirectory", "dir", "common", "NONE", "yellow", "NONE", "yellow"],
     \]
 
 map <Leader> <Plug>(easymotion-prefix)
-nmap s <Plug>(easymotion-overwin-f2)
+nmap s <Plug>(easymotion-overwin-f)
 
 map  / <Plug>(easymotion-sn)
 omap / <Plug>(easymotion-tn)
@@ -450,8 +248,52 @@ map  N <Plug>(easymotion-prev)
 " nnoremap <C-t> :NERDTreeFocus<CR>
 nnoremap <C-t> :NERDTreeToggle<CR>
 
-" GALAGYLINE SECTION
+let g:workspace_autocreate = 1
+
+" C++ highlighting
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+let g:cpp_posix_standard = 1
+let g:cpp_experimental_template_highlight = 1
+let g:cpp_concepts_highlight = 1
+let g:cpp_no_function_highlight = 1
+
+" turn off search highlight
+nnoremap ,<space> :nohlsearch<CR>
+
+
+
 lua << EOF
+
+local should_profile = os.getenv("NVIM_PROFILE")
+if should_profile then
+  require("profile").instrument_autocmds()
+  if should_profile:lower():match("^start") then
+    require("profile").start("*")
+  else
+    require("profile").instrument("*")
+  end
+end
+
+local function toggle_profile()
+  local prof = require("profile")
+  if prof.is_recording() then
+    prof.stop()
+    vim.ui.input({ prompt = "Save profile to:", completion = "file", default = "profile.json" }, function(filename)
+      if filename then
+        prof.export(filename)
+        vim.notify(string.format("Wrote %s", filename))
+      end
+    end)
+  else
+    prof.start("*")
+  end
+end
+
+vim.keymap.set("", "<f1>", toggle_profile)
+
+vim.lsp.set_log_level("ERROR")
 
 local custom_gruvbox = require'lualine.themes.gruvbox'
 
@@ -495,4 +337,152 @@ require('lualine').setup {
   extensions = {}
 }
 
+require "cmp_nvim_lsp"
+require "cmp_nvim_lua"
+
+
+-- Set completeopt to have a better completion experience
+vim.o.completeopt = 'menuone,noselect'
+
+local nvim_lsp = require('lspconfig')
+
+-- Use an on_attach function to only map the following keys
+-- after the language server attaches to the current buffer
+local on_attach = function(client, bufnr)
+
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+  -- Enable completion triggered by <c-x><c-o>
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
+
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+--not ready yet
+--buf_set_keymap("n", "J", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", opts)
+--buf_set_keymap("n", "gR", "<cmd>lua require('goto-preview').goto_preview_references()<CR>", opts)
+  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+--  buf_set_keymap('i', '<C-b>', '<cmd>lua vim.lsp.buf.completion()<CR>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  buf_set_keymap('v', 'ff', '<ESC><cmd>lua vim.lsp.buf.range_formatting()<CR>', opts)
+
+end
+
+-- nvim-cmp supports additional completion capabilities
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+nvim_lsp.clangd.setup {
+  on_attach = on_attach,
+  flags = {
+    debounce_text_changes = 300,
+  },
+  capabilities = capabilities,
+  cmd = {
+    "clangd",
+    "--background-index",
+    "--clang-tidy",
+    "--suggest-missing-includes",
+    "-j=8",
+    "--pch-storage=memory",
+  }
+}
+
+nvim_lsp.intelephense.setup {
+  on_attach = on_attach,
+  flags = {
+    debounce_text_changes = 150,
+  },
+  capabilities = capabilities,
+  settings = {
+    intelephense = {
+      environment = {
+        includePaths = { '/home/andi/engine/tornado/src', }
+      },
+      files = {
+        maxSize = 5000000;
+      },
+    }
+  }
+};
+
+nvim_lsp.pyright.setup {
+  on_attach = on_attach,
+  flags = {
+    debounce_text_changes = 150,
+  },
+  capabilities = capabilities,
+  settings = {
+  }
+}
+
+-- luasnip setup
+local luasnip = require 'luasnip'
+
+-- nvim-cmp setup
+local cmp = require 'cmp'
+
+local select_opts = {behavior = cmp.SelectBehavior.Select}
+
+cmp.setup {
+  completion = {
+    autocomplete = false
+  },
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-p>'] = cmp.mapping.select_prev_item(select_opts),
+    ['<C-n>'] = cmp.mapping.select_next_item(select_opts),
+    --['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    --['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-b>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.close(),
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
+  }),
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'path', keyword_length },
+--    { name = 'buffer', keyword_length = 3 },
+    { name = 'luasnip', keyword_length = 3 },
+  },
+  window = {
+    documentation = cmp.config.window.bordered()
+  },
+  formatting = {
+    fields = {'menu', 'abbr', 'kind'},
+    format = function(entry, item)
+      local menu_icon = {
+        nvim_lsp = 'λ',
+        buffer = 'Ω',
+        path = '∫',
+        luasnip = '†',
+      }
+
+      item.menu = menu_icon[entry.source.name]
+      return item
+    end,
+  },
+}
 EOF
