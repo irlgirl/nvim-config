@@ -85,6 +85,8 @@ filetype indent on      " load filetype-specific indent files
 
 call plug#begin('~/.vim/plugged')
 
+Plug 'rust-lang/rust.vim'
+
 Plug 'tklepzig/vim-buffer-navigator'
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -225,12 +227,15 @@ let g:EasyMotion_smartcase = 1
 let g:BufferNavigatorMapKeys = 0
 map ga :BufferNavigatorToggle<cr>
 let g:BufferNavigatorHighlightRules = [
-    \["CppFile", "file", ".*\\.cpp", "NONE", "red", "NONE", "red"],
+    \["CppFile", "file", ".*\\.cpp", "NONE", "cyan", "NONE", "cyan"],
+    \["RustFile", "file", ".*\\.rs", "NONE", "cyan", "NONE", "cyan"],
+    \["TomlFile", "file", ".*\\.toml", "NONE", "blue", "NONE", "red"],
     \["CppHeader", "file", ".*\\.h", "NONE", "green", "NONE", "green"],
     \["TLFile", "file", ".*\\.tl", "NONE", "cyan", "NONE", "cyan"],
     \["Txt", "file", ".*\\.txt", "NONE", "white", "NONE", "white"],
     \["LogTxt", "file", ".*\\.log", "NONE", "white", "NONE", "white"],
     \["CommonDirectory", "dir", "common", "NONE", "yellow", "NONE", "yellow"],
+    \["SrcDirectory", "dir", "src", "NONE", "yellow", "NONE", "yellow"],
     \]
 
 map <Leader> <Plug>(easymotion-prefix)
@@ -376,12 +381,12 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
 --  buf_set_keymap('i', '<C-b>', '<cmd>lua vim.lsp.buf.completion()<CR>', opts)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float() <CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap('v', 'ff', '<ESC><cmd>lua vim.lsp.buf.range_formatting()<CR>', opts)
-
+  buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+  --buf_set_keymap('v', 'ff', '<ESC><cmd>lua vim.lsp.buf.range_formatting()<CR>', opts)
+  buf_set_keymap("v", "ff", '<ESC><cmd>lua vim.lsp.buf.format()<CR>', opts)
 end
 
 -- nvim-cmp supports additional completion capabilities
@@ -429,6 +434,52 @@ nvim_lsp.pyright.setup {
   },
   capabilities = capabilities,
   settings = {
+  }
+}
+
+nvim_lsp.taplo.setup {
+  on_attach = on_attach,
+  flags = {
+  },
+  capabilities = capabilities,
+  settings = {
+  }
+}
+
+nvim_lsp.vimls.setup {
+  on_attach = on_attach,
+  flags = {
+  },
+  capabilities = capabilities,
+  settings = {
+  }
+}
+
+nvim_lsp.rust_analyzer.setup {
+  on_attach = on_attach,
+  flags = {
+  },
+  capabilities = capabilities,
+  settings = {
+    ["rust-analyzer"] = {
+      checkOnSave = {
+        command = "clippy"
+      },
+      imports = {
+        granularity = {
+          group = "module",
+        },
+        prefix = "self",
+      },
+      cargo = {
+        buildScripts = {
+          enable = true,
+        },
+      },
+      procMacro = {
+        enable = true
+      },
+    }
   }
 }
 
@@ -485,4 +536,6 @@ cmp.setup {
     end,
   },
 }
+
+vim.diagnostic.config({severity_sort = true })
 EOF
