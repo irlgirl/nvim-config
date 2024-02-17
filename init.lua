@@ -37,7 +37,6 @@ require('packer').startup(function(use)
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
-
   use 'tklepzig/vim-buffer-navigator'
   use 'schickling/vim-bufonly'
   use 'easymotion/vim-easymotion'
@@ -48,6 +47,12 @@ require('packer').startup(function(use)
   use {'junegunn/fzf', run = ":call fzf#install()"}
   use 'junegunn/fzf.vim'
   use 'airblade/vim-gitgutter'
+
+  use {
+    'nvim-telescope/telescope.nvim', tag = '0.1.5',
+  -- or                            , branch = '0.1.x',
+    requires = { {'nvim-lua/plenary.nvim'} }
+  }
 
   use 'ntpeters/vim-better-whitespace'
 
@@ -113,6 +118,14 @@ vim.o.fileformat = unix
 
 
 vim.g.gitgutter_enabled = false
+
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+vim.keymap.set('n', '<leader>gm', builtin.marks, {})
+vim.keymap.set('n', '<leader>gr', builtin.lsp_references, {})
+vim.keymap.set('n', '<leader>gd', builtin.diagnostics, {})
 
 vim.g.BufferNavigatorMapKeys = 0
 vim.keymap.set('n', 'ga', '<cmd>:BufferNavigatorToggle<CR>')
