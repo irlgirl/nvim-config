@@ -63,6 +63,7 @@ require('packer').startup(function(use)
 
   -- LSP Modules
   use 'rust-lang/rust.vim'
+  use 'tekumara/typos-lsp'
 
   -- color schemas
   use 'morhetz/gruvbox'  -- colorscheme gruvbox
@@ -114,8 +115,6 @@ vim.o.expandtab = true
 vim.o.autoindent = true
 vim.o.fileformat = unix
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
-
-
 
 vim.g.gitgutter_enabled = false
 
@@ -213,6 +212,9 @@ require('lualine').setup {
     lualine_y = {
       {
         'buffers',
+        max_length = vim.o.columns * 2 / 3,
+        show_filename_only = true,   -- Shows shortened relative path when set to false.
+
       }
     },
     lualine_z = {"os.date('%X')"}
@@ -221,6 +223,7 @@ require('lualine').setup {
     lualine_a = {},
     lualine_b = {},
     lualine_c = {'filename'},
+
     lualine_x = {'location'},
     lualine_y = {},
     lualine_z = {}
@@ -357,6 +360,21 @@ nvim_lsp.rust_analyzer.setup {
   }
 }
 
+nvim_lsp.typos_lsp.setup({
+    config = {
+        -- Logging level of the language server. Logs appear in :LspLog. Defaults to error.
+        cmd_env = { RUST_LOG = "error" }
+    },
+    init_options = {
+        -- Custom config. Used together with any workspace config files, taking precedence for
+        -- settings declared in both. Equivalent to the typos `--config` cli argument.
+        config = '~/code/typos-lsp/crates/typos-lsp/tests/typos.toml',
+        -- How typos are rendered in the editor, eg: as errors, warnings, information, or hints.
+        -- Defaults to error.
+        diagnosticSeverity = "Information"
+    }
+})
+
 -- luasnip setup
 local luasnip = require 'luasnip'
 
@@ -385,12 +403,12 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-  }),
+  }), 
   sources = {
     { name = 'nvim_lsp' },
     { name = 'path', keyword_length },
 --    { name = 'buffer', keyword_length = 3 },
-    { name = 'luasnip', keyword_length = 3 },
+    { name = 'luasnip', keyword_length = 3 }, 
   },
   window = {
     documentation = cmp.config.window.bordered()
