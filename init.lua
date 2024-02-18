@@ -41,7 +41,17 @@ require('packer').startup(function(use)
   use 'easymotion/vim-easymotion'
   use 'rbgrouleff/bclose.vim'
 
-  use 'preservim/nerdtree'
+  -- use 'preservim/nerdtree'
+  use {
+  "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    requires = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+      "MunifTanjim/nui.nvim",
+      "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+    }
+  }
 
   use({
     "utilyre/barbecue.nvim",
@@ -138,10 +148,14 @@ vim.o.fileformat = unix
 
 vim.g.gitgutter_enabled = false
 
+require('nvim-web-devicons').setup {
+   default = true;
+}
+
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', 'gs', builtin.live_grep, {})
-vim.keymap.set('n', 'ga', builtin.buffers, {})
+vim.keymap.set('n', '<leader>ga', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>gm', builtin.marks, {})
 vim.keymap.set('n', '<leader>gr', builtin.lsp_references, {})
@@ -178,8 +192,12 @@ vim.keymap.set('o', '/', '<Plug>(easymotion-tn)')
 vim.keymap.set('n', 'n', '<Plug>(easymotion-next)')
 vim.keymap.set('n', 'N', '<Plug>(easymotion-prev)')
 
--- nnoremap <C-t> :NERDTreeFocus<CR>
-vim.keymap.set('n', '<C-t>', '<cmd>:NERDTreeToggle<CR>')
+require("neo-tree").setup({
+  enable_diagnostics = false,
+  enable_git_status = false,
+})
+vim.keymap.set('n', '<C-t>', '<cmd>:Neotree toggle <CR>')
+vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers toggle <CR>')
 
 vim.g.workspace_autocreate = 0
 
@@ -214,9 +232,6 @@ vim.o.termguicolors = false
 vim.cmd[[colorscheme nightfly]]
 vim.g.nightflyNormalFloat = true
 
-require('nvim-web-devicons').setup {
-   default = true;
-}
 require('lualine').setup {
   options = {
     icons_enabled = true,
@@ -230,7 +245,7 @@ require('lualine').setup {
   sections = {
     lualine_a = {'mode'},
     lualine_b = {'branch', 'diff', 'diagnostics'},
-    lualine_c = { 
+    lualine_c = {
       {
         'searchcount',
         maxcount = 999,
