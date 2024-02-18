@@ -43,6 +43,19 @@ require('packer').startup(function(use)
 
   use 'preservim/nerdtree'
 
+  use({
+    "utilyre/barbecue.nvim",
+    tag = "*",
+    requires = {
+      "SmiteshP/nvim-navic",
+      "nvim-tree/nvim-web-devicons", -- optional dependency
+    },
+    after = "nvim-web-devicons", -- keep this if you're using NvChad
+    config = function()
+      require("barbecue").setup()
+    end,
+  })
+
   use {'junegunn/fzf', run = ":call fzf#install()"}
   use 'junegunn/fzf.vim'
   use 'airblade/vim-gitgutter'
@@ -57,7 +70,7 @@ require('packer').startup(function(use)
   use 'ntpeters/vim-better-whitespace'
 
   -- LSP server
-  use "williamboman/nvim-lsp-installer"
+  use "williamboman/nvim-lsp-installer" -- TODO: replace by MASON
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
 -- Plug 'nvim-lua/lsp-status.nvim'
 
@@ -67,6 +80,9 @@ require('packer').startup(function(use)
 
   -- color schemas
   use 'morhetz/gruvbox'  -- colorscheme gruvbox
+  use 'folke/tokyonight.nvim'
+  use 'bluz71/vim-nightfly-colors'
+
   -- use 'octol/vim-cpp-enhanced-highlight'
 --Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
 --Plug 'kaicataldo/material.vim', { 'branch': 'main' }
@@ -131,7 +147,7 @@ vim.keymap.set('n', 'ga', '<cmd>:BufferNavigatorToggle<CR>')
 vim.g.BufferNavigatorHighlightRules = {
     {"CppFile", "file", ".*\\.cpp", "NONE", "cyan", "NONE", "cyan"},
     {"RustFile", "file", ".*\\.rs", "NONE", "cyan", "NONE", "cyan"},
-    {"TomlFile", "file", ".*\\.toml", "NONE", "blue", "NONE", "red"},
+    {"TomlFile", "file", ".*\\.toml", "NONE", "red", "NONE", "red"},
     {"CppHeader", "file", ".*\\.h", "NONE", "green", "NONE", "green"},
     {"TLFile", "file", ".*\\.tl", "NONE", "cyan", "NONE", "cyan"},
     {"Txt", "file", ".*\\.txt", "NONE", "white", "NONE", "white"},
@@ -139,6 +155,7 @@ vim.g.BufferNavigatorHighlightRules = {
     {"CommonDirectory", "dir", "common", "NONE", "yellow", "NONE", "yellow"},
     {"SrcDirectory", "dir", "src", "NONE", "yellow", "NONE", "yellow"},
     }
+    
 vim.keymap.set('n', '<C-k>', '<cmd>:bn<CR>')
 vim.keymap.set('n', '<C-j>', '<cmd>:bp<CR>')
 vim.keymap.set('n', 'gw', '<cmd>:Bclose<CR>')
@@ -190,14 +207,16 @@ end
 vim.keymap.set("", "<f1>", toggle_profile)
 
 vim.o.termguicolors = false
-vim.cmd[[colorscheme gruvbox]]
+vim.cmd[[colorscheme nightfly]]
+vim.g.nightflyNormalFloat = true
+
 require('nvim-web-devicons').setup {
    default = true;
 }
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme  = 'gruvbox',
+    theme  = auto,
     component_separators = { left = '', right = ''},
     section_separators = { left = '', right = ''},
     disabled_filetypes = {},
@@ -263,6 +282,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end, opts)
     vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
     vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
     vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('v', 'ff', '<ESC><cmd> lua vim.lsp.buf.format()<CR>', opts)
