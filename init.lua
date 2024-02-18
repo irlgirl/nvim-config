@@ -36,7 +36,7 @@ require('packer').startup(function(use)
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
-  use 'tklepzig/vim-buffer-navigator'
+  -- use 'tklepzig/vim-buffer-navigator'
   use 'schickling/vim-bufonly'
   use 'easymotion/vim-easymotion'
   use 'rbgrouleff/bclose.vim'
@@ -113,6 +113,8 @@ require('packer').startup(function(use)
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
+  use 'lewis6991/gitsigns.nvim' -- OPTIONAL: for git status
+  use 'romgrk/barbar.nvim'
 
   use 'stevearc/profile.nvim'
 end)
@@ -136,26 +138,27 @@ vim.g.gitgutter_enabled = false
 
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', 'gs', builtin.live_grep, {})
+vim.keymap.set('n', 'ga', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>gm', builtin.marks, {})
 vim.keymap.set('n', '<leader>gr', builtin.lsp_references, {})
 vim.keymap.set('n', '<leader>gd', builtin.diagnostics, {})
 
-vim.g.BufferNavigatorMapKeys = 0
-vim.keymap.set('n', 'ga', '<cmd>:BufferNavigatorToggle<CR>')
-vim.g.BufferNavigatorHighlightRules = {
-    {"CppFile", "file", ".*\\.cpp", "NONE", "cyan", "NONE", "cyan"},
-    {"RustFile", "file", ".*\\.rs", "NONE", "cyan", "NONE", "cyan"},
-    {"TomlFile", "file", ".*\\.toml", "NONE", "red", "NONE", "red"},
-    {"CppHeader", "file", ".*\\.h", "NONE", "green", "NONE", "green"},
-    {"TLFile", "file", ".*\\.tl", "NONE", "cyan", "NONE", "cyan"},
-    {"Txt", "file", ".*\\.txt", "NONE", "white", "NONE", "white"},
-    {"LogTxt", "file", ".*\\.log", "NONE", "white", "NONE", "white"},
-    {"CommonDirectory", "dir", "common", "NONE", "yellow", "NONE", "yellow"},
-    {"SrcDirectory", "dir", "src", "NONE", "yellow", "NONE", "yellow"},
-    }
-    
+vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
+vim.keymap.set('n', '<C-l>', '<Cmd>BufferNext<CR>')
+vim.keymap.set('n', '<C-h>', '<Cmd>BufferPrevious<CR>')
+vim.keymap.set('n', '<C-w>', '<Cmd>BufferClose<CR>')
+
+require'barbar'.setup {
+ -- Excludes buffers from the tabline TODO
+  exclude_ft = {'javascript'},
+  exclude_name = {'package.json'},
+  tabpages = true,
+}
+
+
+
 vim.keymap.set('n', '<C-k>', '<cmd>:bn<CR>')
 vim.keymap.set('n', '<C-j>', '<cmd>:bp<CR>')
 vim.keymap.set('n', 'gw', '<cmd>:Bclose<CR>')
@@ -230,10 +233,6 @@ require('lualine').setup {
     lualine_x = {'location', 'encoding'},
     lualine_y = {
       {
-        'buffers',
-        max_length = vim.o.columns * 2 / 3,
-        show_filename_only = true,   -- Shows shortened relative path when set to false.
-
       }
     },
     lualine_z = {"os.date('%X')"}
