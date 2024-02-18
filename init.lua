@@ -78,6 +78,8 @@ require('packer').startup(function(use)
   use 'rust-lang/rust.vim'
   use 'tekumara/typos-lsp'
 
+  -- TODO: try SLSPSAGA
+
   -- color schemas
   use 'morhetz/gruvbox'  -- colorscheme gruvbox
   use 'folke/tokyonight.nvim'
@@ -148,7 +150,7 @@ vim.keymap.set('n', '<leader>gd', builtin.diagnostics, {})
 vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
 vim.keymap.set('n', '<C-l>', '<Cmd>BufferNext<CR>')
 vim.keymap.set('n', '<C-h>', '<Cmd>BufferPrevious<CR>')
-vim.keymap.set('n', '<C-w>', '<Cmd>BufferClose<CR>')
+vim.keymap.set('n', '<C-q>', '<Cmd>BufferClose<CR>')
 
 require'barbar'.setup {
  -- Excludes buffers from the tabline TODO
@@ -156,7 +158,6 @@ require'barbar'.setup {
   exclude_name = {'package.json'},
   tabpages = true,
 }
-
 
 
 vim.keymap.set('n', '<C-k>', '<cmd>:bn<CR>')
@@ -229,10 +230,23 @@ require('lualine').setup {
   sections = {
     lualine_a = {'mode'},
     lualine_b = {'branch', 'diff', 'diagnostics'},
-    lualine_c = {},
+    lualine_c = { 
+      {
+        'searchcount',
+        maxcount = 999,
+        timeout = 500,
+      }
+    },
     lualine_x = {'location', 'encoding'},
     lualine_y = {
       {
+        'filetype',
+        colored = true,
+        icon_only = true,
+      },
+      {
+        'filename',
+        path = 1,
       }
     },
     lualine_z = {"os.date('%X')"}
@@ -422,12 +436,12 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-  }), 
+  }),
   sources = {
     { name = 'nvim_lsp' },
     { name = 'path', keyword_length },
 --    { name = 'buffer', keyword_length = 3 },
-    { name = 'luasnip', keyword_length = 3 }, 
+    { name = 'luasnip', keyword_length = 3 },
   },
   window = {
     documentation = cmp.config.window.bordered()
