@@ -55,6 +55,9 @@ require('packer').startup(function(use)
 
   use {
     "folke/noice.nvim",
+    requires = {
+      "rcarriga/nvim-notify",
+    }
   }
 
   use({
@@ -165,6 +168,28 @@ require('nvim-web-devicons').setup {
 -- Setup devicons END
 
 
+-- Setup noice (cmd + notifications UI)
+require("noice").setup({
+  lsp = {
+    -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+    override = {
+      ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+      ["vim.lsp.util.stylize_markdown"] = true,
+      ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+    },
+  },
+  -- you can enable a preset for easier configuration
+  presets = {
+    bottom_search = true, -- use a classic bottom cmdline for search
+    command_palette = true, -- position the cmdline and popupmenu together
+    long_message_to_split = true, -- long messages will be sent to a split
+    inc_rename = false, -- enables an input dialog for inc-rename.nvim
+    lsp_doc_border = false, -- add a border to hover docs and signature help
+  },
+})
+-- Setup noice END
+
+
 -- Setup telescope (fzf-like search plugin
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
@@ -209,14 +234,33 @@ vim.keymap.set('n', 'N', '<Plug>(easymotion-prev)')
 require("neo-tree").setup({
   enable_diagnostics = false,
   enable_git_status = false,
+  window = {
+    mappings = {
+      ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+    }
+  },
+  event_handlers = {
+    {
+      event = "file_opened",
+      handler = function(file_path)
+        require("neo-tree.command").execute({ action = "close" })
+      end
+    },
+  }
 })
-vim.keymap.set('n', '<C-t>', '<cmd>:Neotree toggle <CR>')
-vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers toggle <CR>')
+vim.keymap.set('n', '<C-t>', '<cmd>:Neotree toggle position=float <CR>')
+vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers toggle position=float <CR>')
 -- Setup neo-tree END
 
 
 -- Setup workspace plugin
 vim.g.workspace_autocreate = 0
+vim.g.workspace_create_new_tabs = 0
+vim.g.workspace_session_directory = os.getenv( "HOME" ) .. "/.config/nvim/sessions/"
+vim.g.workspace_undodir = os.getenv( "HOME" ) .. '/.config/nvim/sessions/.undodir'
+
+vim.g.workspace_session_disable_on_args = 1
+
 -- Setup workspace plugin END
 
 
