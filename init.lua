@@ -36,12 +36,13 @@ require('packer').startup(function(use)
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
-  -- use 'tklepzig/vim-buffer-navigator'
+  use {
+    'smoka7/hop.nvim',
+    tag = '*', -- optional but strongly recommended
+  }
   use 'schickling/vim-bufonly'
-  use 'easymotion/vim-easymotion'
   use 'rbgrouleff/bclose.vim'
 
-  -- use 'preservim/nerdtree'
   use {
     "nvim-neo-tree/neo-tree.nvim",
       branch = "v3.x",
@@ -153,6 +154,8 @@ vim.o.expandtab = true
 vim.o.autoindent = true
 vim.o.fileformat = unix
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
+--
+vim.keymap.set('t', '<ESC>', '<C-\\><C-n>')
 -- Core Settings END
 
 
@@ -199,6 +202,7 @@ vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>gm', builtin.marks, {})
 vim.keymap.set('n', '<leader>gr', builtin.lsp_references, {})
 vim.keymap.set('n', '<leader>gd', builtin.diagnostics, {})
+require("telescope").load_extension("noice")
 -- Setup telescope END
 
 
@@ -216,18 +220,30 @@ vim.keymap.set('n', '<C-q>', '<Cmd>BufferClose<CR>')
 -- Setup barbar END
 
 
--- Setup easymotion
-vim.g.EasyMotion_smartcase = 1
+-- Setup Hop (easymotion-like plugin)
+local hop = require('hop')
+hop.setup{
+  jump_on_sole_occurrence = false,
+  case_insensitive = true,
+  create_hl_autocmd = true,
+}
+local directions = require('hop.hint').HintDirection
+
+vim.keymap.set('', '/a', function()
+  hop.hint_anywhere()
+end, {remap=true})
+
+vim.keymap.set('n', '/s', function()
+  hop.hint_char1()
+end, {remap=true})
+
+vim.keymap.set('n', '/f', function()
+  hop.hint_patterns()
+end, {remap=true})
+
+vim.keymap.set('n', '//', ':/')
+
 vim.keymap.set('n', ',<space>', '<cmd>:nohlsearch<CR>') -- turn off search highlight
---vim.keymap.set('n', '<Leader>', '<Plug>(easymotion-prefix)')
-vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f)')
-vim.keymap.set('n', '/', '<Plug>(easymotion-sn)')
-vim.keymap.set('o', '/', '<Plug>(easymotion-tn)')
--- These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
--- Without these mappings, `n` & `N` works fine. (These mappings just provide
--- different highlight method and have some other features )
-vim.keymap.set('n', 'n', '<Plug>(easymotion-next)')
-vim.keymap.set('n', 'N', '<Plug>(easymotion-prev)')
 -- Setup easymotion END
 
 -- Setup neo-tree (file tree + buffer-tree)
@@ -260,7 +276,6 @@ vim.g.workspace_session_directory = os.getenv( "HOME" ) .. "/.config/nvim/sessio
 vim.g.workspace_undodir = os.getenv( "HOME" ) .. '/.config/nvim/sessions/.undodir'
 
 vim.g.workspace_session_disable_on_args = 1
-
 -- Setup workspace plugin END
 
 
@@ -405,6 +420,7 @@ nvim_lsp.clangd.setup {
     "--clang-tidy",
     "--suggest-missing-includes",
     "-j=8",
+    "--offset-encoding=utf-16",
     "--pch-storage=memory",
   }
 }
