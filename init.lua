@@ -43,14 +43,18 @@ require('packer').startup(function(use)
 
   -- use 'preservim/nerdtree'
   use {
-  "nvim-neo-tree/neo-tree.nvim",
-    branch = "v3.x",
-    requires = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-      "MunifTanjim/nui.nvim",
-      "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-    }
+    "nvim-neo-tree/neo-tree.nvim",
+      branch = "v3.x",
+      requires = {
+        "nvim-lua/plenary.nvim",
+        "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+        "MunifTanjim/nui.nvim",
+        "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+      }
+  }
+
+  use {
+    "folke/noice.nvim",
   }
 
   use({
@@ -132,6 +136,7 @@ require('packer').startup(function(use)
 end)
 
 
+-- Core Settings
 vim.o.mouse = "a"
 vim.o.encoding = "utf-8"
 vim.o.number = true
@@ -145,13 +150,22 @@ vim.o.expandtab = true
 vim.o.autoindent = true
 vim.o.fileformat = unix
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
+-- Core Settings END
 
+
+-- Disable GitGutter; TODO: replace to another git-plugin
 vim.g.gitgutter_enabled = false
+-- Disable GitGutter END
 
+
+-- Setup devicons (requires by many plugings)
 require('nvim-web-devicons').setup {
    default = true;
 }
+-- Setup devicons END
 
+
+-- Setup telescope (fzf-like search plugin
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', 'gs', builtin.live_grep, {})
@@ -160,26 +174,24 @@ vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>gm', builtin.marks, {})
 vim.keymap.set('n', '<leader>gr', builtin.lsp_references, {})
 vim.keymap.set('n', '<leader>gd', builtin.diagnostics, {})
+-- Setup telescope END
 
-vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
-vim.keymap.set('n', '<C-l>', '<Cmd>BufferNext<CR>')
-vim.keymap.set('n', '<C-h>', '<Cmd>BufferPrevious<CR>')
-vim.keymap.set('n', '<C-q>', '<Cmd>BufferClose<CR>')
 
+-- Setup barbar (a tab-bar in top)
 require'barbar'.setup {
  -- Excludes buffers from the tabline TODO
   exclude_ft = {'javascript'},
   exclude_name = {'package.json'},
   tabpages = true,
 }
+vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
+vim.keymap.set('n', '<C-l>', '<Cmd>BufferNext<CR>')
+vim.keymap.set('n', '<C-h>', '<Cmd>BufferPrevious<CR>')
+vim.keymap.set('n', '<C-q>', '<Cmd>BufferClose<CR>')
+-- Setup barbar END
 
 
-vim.keymap.set('n', '<C-k>', '<cmd>:bn<CR>')
-vim.keymap.set('n', '<C-j>', '<cmd>:bp<CR>')
-vim.keymap.set('n', 'gw', '<cmd>:Bclose<CR>')
-vim.keymap.set('n', 'gon', '<cmd>:BOnly<CR>')
-
--- easymotion
+-- Setup easymotion
 vim.g.EasyMotion_smartcase = 1
 vim.keymap.set('n', ',<space>', '<cmd>:nohlsearch<CR>') -- turn off search highlight
 --vim.keymap.set('n', '<Leader>', '<Plug>(easymotion-prefix)')
@@ -191,16 +203,24 @@ vim.keymap.set('o', '/', '<Plug>(easymotion-tn)')
 -- different highlight method and have some other features )
 vim.keymap.set('n', 'n', '<Plug>(easymotion-next)')
 vim.keymap.set('n', 'N', '<Plug>(easymotion-prev)')
+-- Setup easymotion END
 
+-- Setup neo-tree (file tree + buffer-tree)
 require("neo-tree").setup({
   enable_diagnostics = false,
   enable_git_status = false,
 })
 vim.keymap.set('n', '<C-t>', '<cmd>:Neotree toggle <CR>')
 vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers toggle <CR>')
+-- Setup neo-tree END
 
+
+-- Setup workspace plugin
 vim.g.workspace_autocreate = 0
+-- Setup workspace plugin END
 
+
+-- Setup nvim-profile plugin
 local should_profile = os.getenv("NVIM_PROFILE")
 if should_profile then
   require("profile").instrument_autocmds()
@@ -225,13 +245,17 @@ local function toggle_profile()
     prof.start("*")
   end
 end
-
 vim.keymap.set("", "<f1>", toggle_profile)
+-- Setup nvim-profile END
 
+
+-- Setup colour theme
 vim.o.termguicolors = false
 vim.cmd[[colorscheme nightfly]]
 vim.g.nightflyNormalFloat = true
+-- Setup colour theme END
 
+-- Setup lualine (line in bottom)
 require('lualine').setup {
   options = {
     icons_enabled = true,
@@ -278,10 +302,12 @@ require('lualine').setup {
   tabline = {},
   extensions = {}
 }
+-- Setup lualine END
 
+
+-- Setup code-complete-plugin + LSP
 require "cmp_nvim_lsp"
 require "cmp_nvim_lua"
-
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -338,7 +364,6 @@ nvim_lsp.clangd.setup {
     "--pch-storage=memory",
   }
 }
-
 nvim_lsp.intelephense.setup {
   flags = {
     debounce_text_changes = 150,
@@ -355,7 +380,6 @@ nvim_lsp.intelephense.setup {
     }
   }
 };
-
 nvim_lsp.pyright.setup {
   flags = {
     debounce_text_changes = 150,
@@ -364,7 +388,6 @@ nvim_lsp.pyright.setup {
   settings = {
   }
 }
-
 nvim_lsp.taplo.setup {
   flags = {
   },
@@ -372,7 +395,6 @@ nvim_lsp.taplo.setup {
   settings = {
   }
 }
-
 nvim_lsp.vimls.setup {
   flags = {
   },
@@ -380,7 +402,6 @@ nvim_lsp.vimls.setup {
   settings = {
   }
 }
-
 nvim_lsp.rust_analyzer.setup {
   flags = {
   },
@@ -407,7 +428,6 @@ nvim_lsp.rust_analyzer.setup {
     }
   }
 }
-
 nvim_lsp.typos_lsp.setup({
     config = {
         -- Logging level of the language server. Logs appear in :LspLog. Defaults to error.
