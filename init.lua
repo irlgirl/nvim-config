@@ -193,15 +193,28 @@ require("noice").setup({
 -- Setup noice END
 
 
--- Setup telescope (fzf-like search plugin
+-- Setup telescope (fzf-like search plugin)
+
+require('telescope').setup{
+  pickers = {
+    lsp_references = {
+      initial_mode="normal"
+    },
+    diagnostics = {
+      initial_mode="normal"
+    },
+  }
+}
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-vim.keymap.set('n', 'gs', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>ga', builtin.buffers, {})
+vim.keymap.set('n', '<leader>fa', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>gm', builtin.marks, {})
-vim.keymap.set('n', '<leader>gr', builtin.lsp_references, {})
-vim.keymap.set('n', '<leader>gd', builtin.diagnostics, {})
+vim.keymap.set('n', '<leader>fm', builtin.marks, {})
+vim.keymap.set('n', '<leader>fh', builtin.search_history, {})
+vim.keymap.set('n', '<leader>fc', builtin.current_buffer_fuzzy_find, {})
+
+vim.keymap.set('n', 'gr', builtin.lsp_references, {})
+vim.keymap.set('n', '<leader>dl', builtin.diagnostics, {})
 require("telescope").load_extension("noice")
 -- Setup telescope END
 
@@ -217,6 +230,7 @@ vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
 vim.keymap.set('n', '<C-l>', '<Cmd>BufferNext<CR>')
 vim.keymap.set('n', '<C-h>', '<Cmd>BufferPrevious<CR>')
 vim.keymap.set('n', '<C-q>', '<Cmd>BufferClose<CR>')
+vim.keymap.set('n', '<C-x>', '<Cmd>BufferClose!<CR>')
 -- Setup barbar END
 
 
@@ -309,9 +323,9 @@ vim.keymap.set("", "<f1>", toggle_profile)
 
 
 -- Setup colour theme
-vim.o.termguicolors = false
-vim.cmd[[colorscheme nightfly]]
-vim.g.nightflyNormalFloat = true
+vim.o.termguicolors = true 
+vim.cmd[[colorscheme gruvbox]]
+--vim.g.nightflyNormalFloat = true
 -- Setup colour theme END
 
 -- Setup lualine (line in bottom)
@@ -397,7 +411,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
     vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
     vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    --vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('v', 'ff', '<ESC><cmd> lua vim.lsp.buf.format()<CR>', opts)
     vim.keymap.set('n', 'ff', function()
       vim.lsp.buf.format { async = true }
