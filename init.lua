@@ -36,6 +36,11 @@ require('packer').startup(function(use)
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
+  -- smt for async
+  use {
+    'nvim-lua/plenary.nvim'
+  }
+
   use {
     'smoka7/hop.nvim',
     tag = '*', -- optional but strongly recommended
@@ -54,10 +59,13 @@ require('packer').startup(function(use)
       }
   }
 
+  use { "rcarriga/nvim-notify", }
   use {
     "folke/noice.nvim",
     requires = {
+      "MunifTanjim/nui.nvim",
       "rcarriga/nvim-notify",
+      "nvim-treesitter/nvim-treesitter",
     }
   }
 
@@ -183,13 +191,16 @@ require("noice").setup({
   },
   -- you can enable a preset for easier configuration
   presets = {
-    bottom_search = true, -- use a classic bottom cmdline for search
+    bottom_search = false, -- use a classic bottom cmdline for search
     command_palette = true, -- position the cmdline and popupmenu together
     long_message_to_split = true, -- long messages will be sent to a split
     inc_rename = false, -- enables an input dialog for inc-rename.nvim
     lsp_doc_border = false, -- add a border to hover docs and signature help
   },
 })
+
+local notify = require("notify")
+vim.keymap.set('n', '<ESC>', notify.dismiss, {})
 -- Setup noice END
 
 
@@ -255,7 +266,7 @@ vim.keymap.set('n', '/f', function()
   hop.hint_patterns()
 end, {remap=true})
 
-vim.keymap.set('n', '//', ':/')
+vim.keymap.set('n', '//', '/')
 
 vim.keymap.set('n', ',<space>', '<cmd>:nohlsearch<CR>') -- turn off search highlight
 -- Setup easymotion END
@@ -323,7 +334,7 @@ vim.keymap.set("", "<f1>", toggle_profile)
 
 
 -- Setup colour theme
-vim.o.termguicolors = true 
+vim.o.termguicolors = true
 vim.cmd[[colorscheme gruvbox]]
 --vim.g.nightflyNormalFloat = true
 -- Setup colour theme END
@@ -510,7 +521,7 @@ nvim_lsp.typos_lsp.setup({
     init_options = {
         -- Custom config. Used together with any workspace config files, taking precedence for
         -- settings declared in both. Equivalent to the typos `--config` cli argument.
-        config = '~/code/typos-lsp/crates/typos-lsp/tests/typos.toml',
+        config = '~/.config/nvim/typos.toml',
         -- How typos are rendered in the editor, eg: as errors, warnings, information, or hints.
         -- Defaults to error.
         diagnosticSeverity = "Information"
