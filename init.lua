@@ -107,7 +107,8 @@ require('packer').startup(function(use)
   -- TODO: try SLSPSAGA
 
   -- color schemas
-  use 'morhetz/gruvbox'  -- colorscheme gruvbox
+  use 'ellisonleao/gruvbox.nvim'
+  -- use 'morhetz/gruvbox'  -- colorscheme gruvbox
   use 'folke/tokyonight.nvim'
   use 'bluz71/vim-nightfly-colors'
 
@@ -177,33 +178,7 @@ require('nvim-web-devicons').setup {
    default = true;
 }
 -- Setup devicons END
-
-
--- Setup noice (cmd + notifications UI)
-require("noice").setup({
-  lsp = {
-    -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
-    override = {
-      ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-      ["vim.lsp.util.stylize_markdown"] = true,
-      ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
-    },
-  },
-  -- you can enable a preset for easier configuration
-  presets = {
-    bottom_search = false, -- use a classic bottom cmdline for search
-    command_palette = true, -- position the cmdline and popupmenu together
-    long_message_to_split = true, -- long messages will be sent to a split
-    inc_rename = false, -- enables an input dialog for inc-rename.nvim
-    lsp_doc_border = false, -- add a border to hover docs and signature help
-  },
-})
-
-local notify = require("notify")
-vim.keymap.set('n', '<ESC>', notify.dismiss, {})
--- Setup noice END
-
-
+--
 -- Setup telescope (fzf-like search plugin)
 
 require('telescope').setup{
@@ -333,17 +308,73 @@ vim.keymap.set("", "<f1>", toggle_profile)
 -- Setup nvim-profile END
 
 
--- Setup colour theme
 vim.o.termguicolors = true
-vim.cmd[[colorscheme gruvbox]]
+vim.o.background = "dark"
+
+-- Setup colour theme
+require("gruvbox").setup({
+  terminal_colors = true, -- add neovim terminal colors
+  undercurl = true,
+  underline = true,
+  bold = true,
+  italic = {
+    strings = false,
+    emphasis = true,
+    comments = true,
+    operators = false,
+    folds = true,
+  },
+  strikethrough = true,
+  invert_selection = false,
+  invert_signs = false,
+  invert_tabline = true,
+  invert_intend_guides = false,
+  inverse = false, -- invert background for search, diffs, statuslines and errors
+  contrast = "hard", -- can be "hard", "soft" or empty string
+  palette_overrides = {},
+  overrides = {},
+  dim_inactive = false,
+  transparent_mode = true,
+})
+vim.cmd([[colorscheme gruvbox]])
 --vim.g.nightflyNormalFloat = true
 -- Setup colour theme END
+
+-- Setup noice (cmd + notifications UI)
+require("noice").setup({
+  lsp = {
+    -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+    override = {
+      ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+      ["vim.lsp.util.stylize_markdown"] = true,
+      ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+    },
+  },
+  -- you can enable a preset for easier configuration
+  presets = {
+    bottom_search = false, -- use a classic bottom cmdline for search
+    command_palette = true, -- position the cmdline and popupmenu together
+    long_message_to_split = true, -- long messages will be sent to a split
+    inc_rename = false, -- enables an input dialog for inc-rename.nvim
+    lsp_doc_border = true, -- add a border to hover docs and signature help
+  },
+})
+
+local notify = require("notify")
+vim.keymap.set('n', '<ESC>', notify.dismiss, {})
+notify.setup({
+  background_colour = "#000000",
+})
+--
+--
+-- Setup noice END
+
 
 -- Setup lualine (line in bottom)
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme  = auto,
+    theme  = "ayu_mirage",
     component_separators = { left = '', right = ''},
     section_separators = { left = '', right = ''},
     disabled_filetypes = {},
