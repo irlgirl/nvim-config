@@ -14,18 +14,12 @@ require('packer').startup(function(use)
  -- use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
  -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
- -- use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
  -- use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
- -- use 'mjlbach/onedark.nvim' -- Theme inspired by Atom
- -- use 'nvim-lualine/lualine.nvim' -- Fancier statusline
   -- Add indentation guides even on blank lines
  -- use 'lukas-reineke/indent-blankline.nvim'
   -- Add git related info in the signs columns and popups
  -- use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   -- Highlight, edit, and navigate code using a fast incremental parsing library
- -- use 'nvim-treesitter/nvim-treesitter'
-  -- Additional textobjects for treesitter
- -- use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'wbthomason/packer.nvim'
 
   use "hrsh7th/cmp-buffer"
@@ -87,6 +81,7 @@ require('packer').startup(function(use)
   use 'airblade/vim-gitgutter'
 
   use 'nvim-treesitter/nvim-treesitter'
+  use 'nvim-treesitter/nvim-treesitter-textobjects'
   use {
     'nvim-telescope/telescope.nvim', tag = '0.1.5',
   -- or                            , branch = '0.1.x',
@@ -96,15 +91,24 @@ require('packer').startup(function(use)
   use 'ntpeters/vim-better-whitespace'
 
   -- LSP server
-  use "williamboman/nvim-lsp-installer" -- TODO: replace by MASON
+  use "williamboman/mason.nvim"
+
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
 -- Plug 'nvim-lua/lsp-status.nvim'
 
   -- LSP Modules
-  use 'rust-lang/rust.vim'
   use 'tekumara/typos-lsp'
+  use 'rust-lang/rust.vim'
+
+  use {
+    'mrcjkb/rustaceanvim',
+    version = '^4', -- Recommended
+    ft = { 'rust' },
+  }
 
   -- TODO: try SLSPSAGA
+  --
+  use 'mfussenegger/nvim-dap' -- TODO: Debugging!!!
 
   -- color schemas
   use 'ellisonleao/gruvbox.nvim'
@@ -125,16 +129,7 @@ require('packer').startup(function(use)
   require "cmp_nvim_lua"
   require 'lspconfig'
 
-  require("nvim-lsp-installer").setup {
-    automatic_installation = true, -- automatically detect which servers to install (based on which servers are set up via lspconfig
-    ui = {
-        icons = {
-            server_installed = "✓",
-            server_pending = "➜",
-            server_uninstalled = "✗"
-        }
-    }
-  }
+  require("mason").setup()
 
   -- statusline
   use 'kyazdani42/nvim-web-devicons'
@@ -199,17 +194,18 @@ vim.keymap.set('n', '<leader>fm', builtin.marks, {})
 vim.keymap.set('n', '<leader>fh', builtin.search_history, {})
 vim.keymap.set('n', '<leader>fc', builtin.current_buffer_fuzzy_find, {})
 
-vim.keymap.set('n', 'gr', builtin.lsp_references, {})
 vim.keymap.set('n', '<leader>dl', builtin.diagnostics, {})
 require("telescope").load_extension("noice")
+require("telescope").load_extension("notify")
+
 -- Setup telescope END
 
 
 -- Setup barbar (a tab-bar in top)
 require'barbar'.setup {
  -- Excludes buffers from the tabline TODO
-  exclude_ft = {'javascript'},
-  exclude_name = {'package.json'},
+  -- exclude_ft = {'javascript'},
+  -- exclude_name = {'package.json'},
   tabpages = true,
 }
 vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
@@ -349,21 +345,51 @@ require("noice").setup({
       ["vim.lsp.util.stylize_markdown"] = true,
       ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
     },
+    progress = {
+      enabled = true,
+      -- Lsp Progress is formatted using the builtins for lsp_progress. See config.format.builtin
+      -- See the section on formatting for more details on how to customize.
+      --- @type NoiceFormat|string
+      format = "lsp_progress",
+      --- @type NoiceFormat|string
+      format_done = "lsp_progress_done",
+      throttle = 250, -- frequency to update lsp progress message
+      view = "mini",
+    },
+    signature = {
+      enabled = true,
+      auto_open = {
+        enabled = true,
+        trigger = true, -- Automatically show signature help when typing a trigger character from the LSP
+        luasnip = true, -- Will open signature help when jumping to Luasnip insert nodes
+        throttle = 50, -- Debounce lsp signature help request by 50ms
+      },
+      view = nil, -- when nil, use defaults from documentation
+      ---@type NoiceViewOptions
+      opts = {}, -- merged with defaults from documentation
+    },
   },
   -- you can enable a preset for easier configuration
   presets = {
     bottom_search = false, -- use a classic bottom cmdline for search
     command_palette = true, -- position the cmdline and popupmenu together
-    long_message_to_split = true, -- long messages will be sent to a split
+    long_message_to_split = false, -- long messages will be sent to a split
     inc_rename = false, -- enables an input dialog for inc-rename.nvim
     lsp_doc_border = true, -- add a border to hover docs and signature help
   },
+  throttle = 150, -- check for updates??
+  log = vim.fn.stdpath("state") .. "/noice.log",
+  log_max_size = 1024 * 1024 * 2, -- 10MB
 })
 
 local notify = require("notify")
 vim.keymap.set('n', '<ESC>', notify.dismiss, {})
 notify.setup({
   background_colour = "#000000",
+  stages="static",
+  fps = 15,
+  render="default",
+  timeout=5000,
 })
 --
 --
@@ -430,30 +456,49 @@ vim.o.completeopt = 'menuone,noselect'
 vim.lsp.set_log_level("ERROR")
 local nvim_lsp = require('lspconfig')
 
+vim.diagnostic.config {
+  signs = true,
+  underline = true,
+  virtual_text = false,
+  virtual_lines = false,
+  update_in_insert = false,
+  severity_sort = true,
+  float = {
+    -- UI.
+    header = false,
+    border = 'rounded',
+    focusable = true,
+  }
+}
+
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   callback = function(ev)
+    local builtin = require('telescope.builtin')
     -- Enable completion triggered by <c-x><c-o>
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
     -- Buffer local mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local opts = { buffer = ev.buf }
+    local opts = { buffer = ev.buf, silent = true }
+
+    vim.keymap.set('n', 'gd', builtin.lsp_definitions, opts)
+    vim.keymap.set('n', 'gi', builtin.lsp_implementations, opts)
+    vim.keymap.set('n', 'gr', builtin.lsp_references, opts)
+
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-    vim.keymap.set('n', '<C-s>', vim.lsp.buf.signature_help, opts)
-    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
-    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
-    vim.keymap.set('n', '<space>wl', function()
-      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, opts)
-    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+
+--    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
+--    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
+--    vim.keymap.set('n', '<space>wl', function()
+--      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+--    end, opts)
+    vim.keymap.set('n', '<space>D', builtin.lsp_type_definitions, opts)
     vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
     vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
     vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
-    --vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('v', 'ff', '<ESC><cmd> lua vim.lsp.buf.format()<CR>', opts)
     vim.keymap.set('n', 'ff', function()
       vim.lsp.buf.format { async = true }
@@ -518,8 +563,15 @@ nvim_lsp.vimls.setup {
   settings = {
   }
 }
+
+--[[ FIXME: didn't required due to rustaceanvim
 nvim_lsp.rust_analyzer.setup {
+
+  on_attach = function(client, bufnr)
+    vim.lsp.inlay_hint.enable(bufnr)
+  end,
   flags = {
+    debounce_text_changes = 0,
   },
   capabilities = capabilities,
   settings = {
@@ -544,6 +596,7 @@ nvim_lsp.rust_analyzer.setup {
     }
   }
 }
+]]--
 nvim_lsp.typos_lsp.setup({
     config = {
         -- Logging level of the language server. Logs appear in :LspLog. Defaults to error.
@@ -592,7 +645,7 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'path', keyword_length },
 --    { name = 'buffer', keyword_length = 3 },
-    { name = 'luasnip', keyword_length = 3 },
+--    { name = 'luasnip', keyword_length = 3 },
   },
   window = {
     documentation = cmp.config.window.bordered()
@@ -602,9 +655,9 @@ cmp.setup {
     format = function(entry, item)
       local menu_icon = {
         nvim_lsp = 'λ',
-        buffer = 'Ω',
+        -- buffer = 'Ω',
         path = '∫',
-        luasnip = '†',
+        -- luasnip = '†',
       }
 
       item.menu = menu_icon[entry.source.name]
@@ -613,4 +666,87 @@ cmp.setup {
   },
 }
 
-vim.diagnostic.config({severity_sort = true })
+require'nvim-treesitter.configs'.setup {
+  -- A list of parser names, or "all" (the five listed parsers should always be installed)
+  ensure_installed = { "c", "cpp", "rust", "python", "lua", "vim", "vimdoc", "git_rebase", "gitcommit", "regex" },
+
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
+  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+
+  highlight = {
+    enable = false,
+
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
+  },
+}
+
+--[[
+-- FIXME
+-- DIRTY HACK!!!
+-- rustaceanvim plugin contains such code, which lead to crates in /vendor/ mapped to another crate dir. we want remap it into root_dir
+local cargo_crate_dir = vim.fs.dirname(vim.fs.find({ 'Cargo.toml' }, {
+  upward = true,
+  path = path,
+})[1])
+]]--
+
+local find_orig = vim.fs.find
+vim.fs.find = function(what, where)
+  if what[1] == 'Cargo.toml' then
+    if string.find(where['path'], '/vendor/') then
+      local vendor = find_orig({ 'vendor' }, where)[1]
+      vim.notify(string.format("vim.fs.find(`%s`) in `%s` was remappend into `%s`", what[1], where['path'], vendor))
+
+      return find_orig(what, { upward = where['upward'], path = vendor })
+    end
+  end
+
+  return find_orig(what, where)
+end
+
+vim.g.rustaceanvim = {
+  -- Plugin configuration
+  tools = {
+    reload_workspace_from_cargo_toml = false,
+  },
+  server = {
+    ---@param project_root string Path to the project root
+    settings = function(project_root)
+      return {
+        ["rust-analyzer"] = {
+          checkOnSave = {
+            command = "clippy"
+          },
+          imports = {
+            granularity = {
+              group = "module",
+            },
+            prefix = "self",
+          },
+          cargo = {
+            buildScripts = {
+              enable = true,
+            },
+          },
+          procMacro = {
+            enable = true
+          },
+        }
+      }
+    end,
+  },
+  -- DAP configuration
+  dap = {
+  },
+}
