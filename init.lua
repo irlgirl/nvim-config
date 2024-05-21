@@ -247,9 +247,30 @@ require("neo-tree").setup({
   enable_diagnostics = false,
   enable_git_status = false,
   window = {
+    width = 80,
+    position = "float",
+
+    mapping_options = {
+      noremap = true,
+      nowait = true,
+    },
     mappings = {
-      ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+      ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = false } },
     }
+  },
+  filesystem = {
+    follow_current_file = {
+      enabled = true, -- This will find and focus the file in the active buffer every time
+      --              -- the current file is changed while the tree is open.
+      leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+	  },
+  },
+  buffers = {
+    follow_current_file = {
+      enabled = true, -- This will find and focus the file in the active buffer every time
+      --              -- the current file is changed while the tree is open.
+      leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+	  },
   },
   event_handlers = {
     {
@@ -258,10 +279,28 @@ require("neo-tree").setup({
         require("neo-tree.command").execute({ action = "close" })
       end
     },
+  },
+  default_component_configs = {
+    file_size = {
+      enabled = false,
+    },
+    type = {
+      enabled = true,
+      required_width = 80, -- min width of window required to show this column
+    },
+    last_modified = {
+      enabled = false,
+    },
+    created = {
+      enabled = false,
+    },
+    symlink_target = {
+      enabled = false,
+    },
   }
 })
-vim.keymap.set('n', '<C-t>', '<cmd>:Neotree toggle position=float <CR>')
-vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers toggle position=float <CR>')
+vim.keymap.set('n', '<C-t>', '<cmd>:Neotree reveal <CR>')
+vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers reveal <CR>')
 -- Setup neo-tree END
 
 
