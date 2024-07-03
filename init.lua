@@ -116,6 +116,7 @@ require('packer').startup(function(use)
   use 'bluz71/vim-nightfly-colors'
   use { "catppuccin/nvim", as = "catppuccin" }
   use {'AlexvZyl/nordic.nvim'}
+  use "EdenEast/nightfox.nvim"
 
   -- use 'octol/vim-cpp-enhanced-highlight'
 --Plug 'mhartington/oceanic-next'  " colorscheme OceanicNext
@@ -455,7 +456,7 @@ require("catppuccin").setup({
     },
 })
 -- setup must be called before loading
-vim.cmd("colorscheme tokyonight")
+vim.cmd("colorscheme nightfox")
 
 vim.opt.guicursor = "c-ci-i:ver25"
 --vim.g.nightflyNormalFloat = true
