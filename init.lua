@@ -188,7 +188,8 @@ require('telescope').setup{
     diagnostics = {
       initial_mode="normal"
     },
-  }
+  },
+  defaults = { file_ignore_patterns = {"vendor"} }
 }
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
@@ -208,7 +209,7 @@ require("telescope").load_extension("notify")
 -- Setup barbar (a tab-bar in top)
 require'barbar'.setup {
  -- Excludes buffers from the tabline TODO
-  -- exclude_ft = {'javascript'},
+  -- exclude_ft = {'javascipt'},
   -- exclude_name = {'package.json'},
   tabpages = true,
   animation = true,
