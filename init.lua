@@ -591,7 +591,15 @@ require('lualine').setup {
         timeout = 500,
       }
     },
-    lualine_x = {'location', 'encoding'},
+    lualine_x = {
+      {
+          require("noice").api.statusline.mode.get,
+          cond = require("noice").api.statusline.mode.has,
+          color = { fg = "#ff9e64" },
+      },
+      'location',
+      'encoding'
+    },
     lualine_y = {
       {
         'filetype',
@@ -661,7 +669,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gr', builtin.lsp_references, opts)
 
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', 'K', function ()
+      if vim.bo.filetype == 'rust' then
+        vim.cmd.RustLsp({'hover', 'actions'})
+      else
+        vim.lsp.buf.hover()
+      end
+    end, opts)
     vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
 
 --    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
