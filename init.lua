@@ -26,10 +26,12 @@ require('packer').startup(function(use)
   use "hrsh7th/cmp-path"
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin,
   use "hrsh7th/cmp-nvim-lsp"
+  use "hrsh7th/cmp-nvim-lsp-signature-help"
   use "hrsh7th/cmp-nvim-lua"
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
+  -- use 'nvimdev/lspsaga.nvim'
   -- smt for async
   use {
     'nvim-lua/plenary.nvim'
@@ -83,7 +85,7 @@ require('packer').startup(function(use)
   use 'nvim-treesitter/nvim-treesitter'
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.5',
+    'nvim-telescope/telescope.nvim', tag = '0.1.8',
   -- or                            , branch = '0.1.x',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
@@ -147,15 +149,15 @@ end)
 
 
 -- Core Settings
-vim.o.mouse = "a"
+vim.o.mouse = "ar"
 vim.o.encoding = "utf-8"
 vim.o.number = true
 vim.o.swapfile = false
 vim.o.scrolloff = 7
 
-vim.o.tabstop = 2
-vim.o.softtabstop = 2
-vim.o.shiftwidth = 2
+vim.o.tabstop = 4
+vim.o.softtabstop = 4
+vim.o.shiftwidth = 4
 vim.o.expandtab = true
 vim.o.autoindent = true
 vim.o.fileformat = unix
@@ -163,7 +165,7 @@ vim.o.fileformat = unix
 vim.keymap.set('n', 'TT', '<cmd>:terminal<CR>')
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
 --
-vim.keymap.set('t', '<ESC>', '<C-\\><C-n>')
+-- vim.keymap.set('t', '<ESC>', '<C-\\><C-n>')
 -- Core Settings END
 
 
@@ -199,6 +201,8 @@ vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fm', builtin.marks, {})
 vim.keymap.set('n', '<leader>fh', builtin.search_history, {})
 vim.keymap.set('n', '<leader>fc', builtin.current_buffer_fuzzy_find, {})
+--vim.keymap.set('', '<c-z>' , '<Cmd>:echo "NO! Use <TT> to open terminal buffer"<CR>')
+vim.keymap.set('', '<c-z>' , '<Cmd>:sus!<CR>')
 
 vim.keymap.set('n', '<leader>dl', builtin.diagnostics, {})
 require("telescope").load_extension("noice")
@@ -695,9 +699,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
       end
     end, opts)
 
-    vim.keymap.set('v', 'ff', '<ESC><cmd> lua vim.lsp.buf.format()<CR>', opts)
+    vim.keymap.set('v', 'ff', vim.lsp.buf.format, opts)
     vim.keymap.set('n', 'ff', function()
-      vim.lsp.buf.format { async = true }
+      vim.lsp.buf.format { async = false }
     end, opts)
   end,
 })
@@ -716,7 +720,8 @@ nvim_lsp.clangd.setup {
     "--background-index",
     "--clang-tidy",
     "--suggest-missing-includes",
-    "-j=8",
+    "--completion-style=detailed",
+    "-j=28",
     "--offset-encoding=utf-16",
     "--pch-storage=memory",
   }
@@ -737,13 +742,19 @@ nvim_lsp.intelephense.setup {
     }
   }
 };
-nvim_lsp.pyright.setup {
-  flags = {
-    debounce_text_changes = 150,
-  },
-  capabilities = capabilities,
-  settings = {
-  }
+nvim_lsp.pylsp.setup {
+    settings = {
+        pylsp = {
+            plugins = {
+                pycodestyle = {
+                    maxLineLength = 200,
+                },
+                flake8 = {
+                    maxLineLength = 200,
+                }
+            }
+        }
+    }
 }
 nvim_lsp.taplo.setup {
   flags = {
@@ -816,6 +827,7 @@ local cmp = require 'cmp'
 
 local select_opts = {behavior = cmp.SelectBehavior.Select}
 
+
 cmp.setup {
   completion = {
     autocomplete = false
@@ -837,14 +849,17 @@ cmp.setup {
       select = true,
     },
   }),
+  view = { docs = { auto_open = true } },
   sources = {
     { name = 'nvim_lsp' },
+    { name = 'nvim_lsp_signature_help' },
     { name = 'path', keyword_length },
 --    { name = 'buffer', keyword_length = 3 },
 --    { name = 'luasnip', keyword_length = 3 },
   },
   window = {
-    documentation = cmp.config.window.bordered()
+    documentation = cmp.config.window.bordered(),
+    completion = cmp.config.window.bordered(),
   },
   formatting = {
     fields = {'menu', 'abbr', 'kind'},
@@ -857,6 +872,7 @@ cmp.setup {
       }
 
       item.menu = menu_icon[entry.source.name]
+      --item.menu = entry:get_completion_item().detail
       return item
     end,
   },
@@ -864,7 +880,7 @@ cmp.setup {
 
 require'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all" (the five listed parsers should always be installed)
-  ensure_installed = { "c", "cpp", "rust", "python", "lua", "vim", "vimdoc", "git_rebase", "gitcommit", "regex" },
+  ensure_installed = { "c", "cpp", "rust", "python", "lua", "vim", "vimdoc", "git_rebase", "gitcommit", "regex", "markdown", "markdown_inline" },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
