@@ -129,17 +129,11 @@ require('packer').startup(function(use)
 
 --Plug 'rmagatti/goto-preview'
 
-  require "cmp_nvim_lsp"
-  require "cmp_nvim_lua"
-  require 'lspconfig'
-
-  require("mason").setup()
-
   -- statusline
-  use 'kyazdani42/nvim-web-devicons'
+  use 'nvim-tree/nvim-web-devicons'
   use {
     'nvim-lualine/lualine.nvim',
-    requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+    requires = { 'nvim-tree/nvim-web-devicons', opt = true }
   }
   use 'lewis6991/gitsigns.nvim' -- OPTIONAL: for git status
   use 'romgrk/barbar.nvim'
@@ -162,7 +156,7 @@ vim.o.softtabstop = 4
 vim.o.shiftwidth = 4
 vim.o.expandtab = true
 vim.o.autoindent = true
-vim.o.fileformat = unix
+vim.o.fileformat = "unix"
 
 vim.keymap.set('n', 'TT', '<cmd>:terminal<CR>')
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
@@ -655,6 +649,8 @@ require('lualine').setup {
 require "cmp_nvim_lsp"
 require "cmp_nvim_lua"
 
+require("mason").setup()
+
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
@@ -934,12 +930,14 @@ local cargo_crate_dir = vim.fs.dirname(vim.fs.find({ 'Cargo.toml' }, {
 
 local find_orig = vim.fs.find
 vim.fs.find = function(what, where)
-  if what[1] == 'Cargo.toml' then
-    if string.find(where['path'], '/vendor/') then
+  local path = where and where.path
+  if type(what) == "table" and what[1] == 'Cargo.toml' and type(path) == "string" then
+    if string.find(path, '/vendor/', 1, true) then
       local vendor = find_orig({ 'vendor' }, where)[1]
-      vim.notify(string.format("vim.fs.find(`%s`) in `%s` was remappend into `%s`", what[1], where['path'], vendor))
-
-      return find_orig(what, { upward = where['upward'], path = vendor })
+      if vendor then
+        vim.notify(string.format("vim.fs.find(`%s`) in `%s` was remapped into `%s`", what[1], path, vendor))
+        return find_orig(what, { upward = where.upward, path = vendor })
+      end
     end
   end
 
