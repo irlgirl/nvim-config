@@ -145,6 +145,8 @@ require('packer').startup(function(use)
   use 'romgrk/barbar.nvim'
 
   use 'stevearc/profile.nvim'
+
+  use "johnseth97/codex.nvim"
 end)
 
 
@@ -255,6 +257,23 @@ vim.keymap.set('n', '//', '/')
 
 vim.keymap.set('n', ',<space>', '<cmd>:nohlsearch<CR>') -- turn off search highlight
 -- Setup easymotion END
+
+-- Setup codex
+vim.keymap.set('t', '<Esc>','<C-\\><C-n>')
+vim.keymap.set('n', '<leader>cc', '<cmd>:CodexToggle<CR>') -- turn off search highlight
+require("codex").setup({
+    keymaps     = {
+      toggle = nil, -- Keybind to toggle Codex window (Disabled by default, watch out for conflicts)
+      quit = '<C-q>', -- Keybind to close the Codex window (default: Ctrl + q)
+    },         -- Disable internal default keymap (<leader>cc -> :CodexToggle)
+    border      = 'rounded',  -- Options: 'single', 'double', or 'rounded'
+    width       = 0.5,        -- Width of the floating window (0.0 to 1.0)
+    height      = 0.8,        -- Height of the floating window (0.0 to 1.0)
+    model       = nil,        -- Optional: pass a string to use a specific model (e.g., 'o3-mini')
+    autoinstall = true,       -- Automatically install the Codex CLI if not found
+    panel       = true,      -- Open Codex in a side-panel (vertical split) instead of floating window
+    use_buffer  = false,      -- Capture Codex stdout into a normal buffer instead of a terminal buffer
+})
 
 -- Setup neo-tree (file tree + buffer-tree)
 require("neo-tree").setup({
