@@ -130,6 +130,7 @@ require('packer').startup(function(use)
 --Plug 'rmagatti/goto-preview'
 
   -- statusline
+  use 'echasnovski/mini.icons'
   use 'nvim-tree/nvim-web-devicons'
   use {
     'nvim-lualine/lualine.nvim',
@@ -141,15 +142,17 @@ require('packer').startup(function(use)
   use 'stevearc/profile.nvim'
 
   use "johnseth97/codex.nvim"
+  use "folke/which-key.nvim"
 end)
 
 
 -- Core Settings
-vim.o.mouse = "ar"
+vim.o.mouse = "a"
 vim.o.encoding = "utf-8"
 vim.o.number = true
 vim.o.swapfile = false
 vim.o.scrolloff = 7
+vim.o.updatetime = 1000
 
 vim.o.tabstop = 4
 vim.o.softtabstop = 4
@@ -157,6 +160,12 @@ vim.o.shiftwidth = 4
 vim.o.expandtab = true
 vim.o.autoindent = true
 vim.o.fileformat = "unix"
+
+-- Resize splits with hotkeys.
+vim.keymap.set('n', '<C-S-k>', '<cmd>resize +2<CR>')
+vim.keymap.set('n', '<C-S-j>', '<cmd>resize -2<CR>')
+vim.keymap.set('n', '<C-S-h>', '<cmd>vertical resize -2<CR>')
+vim.keymap.set('n', '<C-S-l>', '<cmd>vertical resize +2<CR>')
 
 vim.keymap.set('n', 'TT', '<cmd>:terminal<CR>')
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
@@ -174,6 +183,7 @@ vim.g.gitgutter_enabled = false
 require('nvim-web-devicons').setup {
    default = true;
 }
+require('mini.icons').setup()
 -- Setup devicons END
 --
 -- Setup telescope (fzf-like search plugin)
@@ -587,6 +597,11 @@ notify.setup({
 -- Setup noice END
 
 
+-- Setup which-key
+require("which_key")
+-- Setup which-key END
+
+
 -- Setup lualine (line in bottom)
 require('lualine').setup {
   options = {
@@ -676,6 +691,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   callback = function(ev)
     local builtin = require('telescope.builtin')
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
     -- Enable completion triggered by <c-x><c-o>
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
@@ -718,6 +734,20 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'ff', function()
       vim.lsp.buf.format { async = false }
     end, opts)
+
+    if client and client.supports_method("textDocument/documentHighlight") then
+      local hl_group = vim.api.nvim_create_augroup("LspDocumentHighlight" .. ev.buf, { clear = true })
+      vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+        group = hl_group,
+        buffer = ev.buf,
+        callback = vim.lsp.buf.document_highlight,
+      })
+      vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+        group = hl_group,
+        buffer = ev.buf,
+        callback = vim.lsp.buf.clear_references,
+      })
+    end
   end,
 })
 
