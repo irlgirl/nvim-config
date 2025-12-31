@@ -109,7 +109,7 @@ require('packer').startup(function(use)
 
     use {
         'mrcjkb/rustaceanvim',
-        version = '^4', -- Recommended
+        version = '^7', -- Recommended
         ft = { 'rust' },
     }
 
@@ -147,6 +147,8 @@ require('packer').startup(function(use)
 
     use "johnseth97/codex.nvim"
     use "folke/which-key.nvim"
+    use "numToStr/Comment.nvim"
+    use { "akinsho/toggleterm.nvim", tag = "*" }
 end)
 
 
@@ -158,9 +160,23 @@ vim.o.swapfile = false
 vim.o.scrolloff = 7
 vim.o.updatetime = 1000
 
-vim.opt.guicursor = "c-ci-i:ver25"
-vim.opt.scroll = 1
+vim.opt.guicursor = "c-ci-i-t:ver25"
 vim.opt.smoothscroll = true
+
+-- Highlight the active window only.
+local active_win_group = vim.api.nvim_create_augroup("ActiveWindowHighlight", { clear = true })
+vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter" }, {
+    group = active_win_group,
+    callback = function()
+        vim.wo.cursorline = true
+    end,
+})
+vim.api.nvim_create_autocmd("WinLeave", {
+    group = active_win_group,
+    callback = function()
+        vim.wo.cursorline = false
+    end,
+})
 
 vim.o.tabstop = 4
 vim.o.softtabstop = 4
@@ -175,7 +191,7 @@ vim.keymap.set('n', '<C-S-j>', '<cmd>resize -2<CR>')
 vim.keymap.set('n', '<C-S-h>', '<cmd>vertical resize -2<CR>')
 vim.keymap.set('n', '<C-S-l>', '<cmd>vertical resize +2<CR>')
 
-vim.keymap.set('n', 'TT', '<cmd>:terminal<CR>')
+-- Toggleterm handles TT mapping below.
 --TODO: vim.o.indent = "on"    -- load filetype-specific indent files
 --
 -- vim.keymap.set('t', '<ESC>', '<C-\\><C-n>')
@@ -198,6 +214,45 @@ require('gitsigns').setup {
 
 -- Setup devicons (requires by many plugings)
 require('nvim-web-devicons').setup { default = true, }
+
+require("Comment").setup()
+
+local function focus_or_toggle(opts)
+    local current_win = vim.api.nvim_get_current_win()
+    local target_win = nil
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if opts.match(buf) then
+            target_win = win
+            break
+        end
+    end
+
+    if target_win then
+        if target_win ~= current_win then
+            vim.api.nvim_set_current_win(target_win)
+            return
+        end
+    end
+
+    if type(opts.command) == "function" then
+        opts.command()
+    else
+        vim.cmd(opts.command)
+    end
+end
+
+require("toggleterm").setup({
+    open_mapping = nil,
+})
+vim.keymap.set('n', '<leader>t', function()
+    focus_or_toggle({
+        match = function(buf)
+            return vim.api.nvim_get_option_value("filetype", { buf = buf }) == "toggleterm"
+        end,
+        command = "ToggleTerm",
+    })
+end)
 require('mini.icons').setup()
 -- Setup devicons END
 
@@ -236,7 +291,7 @@ require 'barbar'.setup {
     -- exclude_ft = {'javascipt'},
     -- exclude_name = {'package.json'},
     tabpages = true,
-    animation = true,
+    animation = false,
     hide = { extensions = false, inactive = false },
 }
 vim.keymap.set('n', '<C-c>', '<Cmd>BufferPick<CR>')
@@ -270,7 +325,19 @@ vim.keymap.set('n', ',<space>', '<cmd>:nohlsearch<CR>') -- turn off search highl
 
 -- Setup codex
 vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')                -- <Esc> to exit from terminal Input mode
-vim.keymap.set('n', '<leader>cc', '<cmd>:CodexToggle<CR>') -- turn off search highlight
+vim.keymap.set('n', '<leader>c', function()
+    focus_or_toggle({
+        match = function(buf)
+            local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+            if ft == "codex" then
+                return true
+            end
+            local name = vim.api.nvim_buf_get_name(buf):lower()
+            return name:find("codex", 1, true) ~= nil
+        end,
+        command = "CodexToggle",
+    })
+end)
 require("codex").setup({
     keymaps     = {
         toggle = nil,        -- Keybind to toggle Codex window (Disabled by default, watch out for conflicts)
@@ -344,7 +411,14 @@ require("neo-tree").setup({
         },
     }
 })
-vim.keymap.set('n', '<C-t>', '<cmd>:Neotree reveal <CR>')
+vim.keymap.set('n', '<leader>n', function()
+    focus_or_toggle({
+        match = function(buf)
+            return vim.api.nvim_get_option_value("filetype", { buf = buf }) == "neo-tree"
+        end,
+        command = "Neotree toggle",
+    })
+end)
 vim.keymap.set('n', 'ga', '<cmd>:Neotree buffers reveal <CR>')
 -- Setup neo-tree END
 
@@ -479,7 +553,7 @@ require('lualine').setup {
         section_separators   = { left = '', right = '' },
         disabled_filetypes   = {},
         always_divide_middle = true,
-        globalstatus         = false,
+        globalstatus         = true,
     },
     sections = {
         lualine_a = { 'mode' },
@@ -513,9 +587,8 @@ require('lualine').setup {
     inactive_sections = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = { 'filename' },
-
-        lualine_x = { 'location' },
+        lualine_c = {},
+        lualine_x = {},
         lualine_y = {},
         lualine_z = {}
     },

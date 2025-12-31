@@ -12,8 +12,7 @@ wk.setup({
 
 wk.add({
   { "<leader>?", "<cmd>WhichKey<CR>", desc = "Which-key" },
-  { "<leader>c", group = "codex" },
-  { "<leader>cc", desc = "Toggle Codex" },
+  { "<leader>c", desc = "Toggle Codex" },
   { "<leader>d", group = "diagnostics" },
   { "<leader>dl", desc = "List diagnostics" },
   { "<leader>f", group = "find" },
@@ -24,6 +23,8 @@ wk.add({
   { "<leader>fh", desc = "Search history" },
   { "<leader>fm", desc = "Marks" },
   { "<leader>fs", desc = "Document symbols" },
+  { "<leader>n", desc = "Neo-tree toggle" },
+  { "<leader>t", desc = "Toggleterm" },
   { "<leader>w", group = "whitespace" },
   { "<leader>wc", "<cmd>StripWhitespaceOnChangedLines<CR>", desc = "Strip on changed lines" },
   { "<leader>wd", "<cmd>DisableWhitespace<CR>", desc = "Disable highlights" },
@@ -45,7 +46,6 @@ wk.add({
   { "<C-q>", desc = "Close buffer" },
   { "<C-x>", desc = "Force close buffer" },
   { "<C-t>", desc = "Neo-tree reveal" },
-  { "TT", desc = "Open terminal" },
   { ",<space>", desc = "Clear search highlight" },
   { "/", group = "hop" },
   { "/a", desc = "Hint anywhere" },
