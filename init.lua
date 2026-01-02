@@ -199,8 +199,12 @@ vim.keymap.set('n', '<C-S-l>', '<cmd>vertical resize +2<CR>')
 
 
 -- Git signs/blame
-require('gitsigns').setup {
-    current_line_blame = true,
+local gitsigns = require('gitsigns')
+gitsigns.setup {
+    signcolumn = false,
+    numhl = false,
+    linehl = false,
+    current_line_blame = false,
     current_line_blame_opts = {
         virt_text = true,
         virt_text_pos = 'eol',
@@ -209,6 +213,19 @@ require('gitsigns').setup {
     },
     current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
 }
+vim.g.gitsigns_enabled = false
+local function set_gitsigns_enabled(enabled)
+    gitsigns.toggle_signs(enabled)
+    gitsigns.toggle_numhl(enabled)
+    gitsigns.toggle_linehl(enabled)
+    gitsigns.toggle_current_line_blame(enabled)
+end
+vim.api.nvim_create_user_command("GitsignsToggle", function()
+    local enabled = not vim.g.gitsigns_enabled
+    set_gitsigns_enabled(enabled)
+    vim.g.gitsigns_enabled = enabled
+    vim.notify(enabled and "Gitsigns enabled" or "Gitsigns disabled")
+end, {})
 -- Git signs/blame END
 
 
