@@ -146,6 +146,13 @@ require('packer').startup(function(use)
     use 'stevearc/profile.nvim'
 
     use "johnseth97/codex.nvim"
+    use {
+        "coder/claudecode.nvim",
+        requires = { "folke/snacks.nvim" },
+        config = function()
+            require("claudecode").setup()
+        end,
+    }
     use "folke/which-key.nvim"
     use "numToStr/Comment.nvim"
     use { "akinsho/toggleterm.nvim", tag = "*" }
@@ -368,6 +375,18 @@ require("codex").setup({
     panel       = true,      -- Open Codex in a side-panel (vertical split) instead of floating window
     use_buffer  = false,     -- Capture Codex stdout into a normal buffer instead of a terminal buffer
 })
+
+-- Setup claudecode
+vim.keymap.set('n', '<leader>v', '<cmd>ClaudeCode<CR>')
+vim.api.nvim_create_autocmd("TermOpen", {
+    callback = function(args)
+        local name = vim.api.nvim_buf_get_name(args.buf):lower()
+        if name:find("claude", 1, true) then
+            vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { buffer = args.buf })
+        end
+    end,
+})
+-- Setup claudecode END
 
 -- Setup neo-tree (file tree + buffer-tree)
 require("neo-tree").setup({

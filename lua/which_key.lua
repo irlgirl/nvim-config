@@ -25,6 +25,7 @@ wk.add({
   { "<leader>fs", desc = "Document symbols" },
   { "<leader>n", desc = "Neo-tree toggle" },
   { "<leader>t", desc = "Toggleterm" },
+  { "<leader>v", desc = "Claude Code" },
   { "<leader>w", group = "whitespace" },
   { "<leader>wc", "<cmd>StripWhitespaceOnChangedLines<CR>", desc = "Strip on changed lines" },
   { "<leader>wd", "<cmd>DisableWhitespace<CR>", desc = "Disable highlights" },
