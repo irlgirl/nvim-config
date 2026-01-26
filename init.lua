@@ -149,9 +149,6 @@ require('packer').startup(function(use)
     use {
         "coder/claudecode.nvim",
         requires = { "folke/snacks.nvim" },
-        config = function()
-            require("claudecode").setup()
-        end,
     }
     use "folke/which-key.nvim"
     use "numToStr/Comment.nvim"
@@ -377,6 +374,18 @@ require("codex").setup({
 })
 
 -- Setup claudecode
+require("claudecode").setup({
+    terminal = {
+        split_side = "right",
+        split_width_percentage = 0.5,
+    },
+    diff_opts = {
+        auto_close_on_accept = true,
+        vertical_split = true,
+        open_in_current_tab = true,
+    },
+    inline_diff = true,
+})
 vim.keymap.set('n', '<leader>v', '<cmd>ClaudeCode<CR>')
 vim.api.nvim_create_autocmd("TermOpen", {
     callback = function(args)
